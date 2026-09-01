@@ -3,11 +3,13 @@ package com.fridge.fridge.service;
 import com.fridge.fridge.model.Item;
 import com.fridge.fridge.repository.ItemRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional(readOnly = true)
 public class ItemService {
 
     private final ItemRepository itemRepository;
@@ -20,31 +22,34 @@ public class ItemService {
         return itemRepository.findAll();
     }
 
-    public Item salvar(Item item) {
-        return itemRepository.save(item);
-    }
+    @Transactional
+        public Item salvar(Item item) {
+            return itemRepository.save(item);
+        }
 
     public Optional<Item> buscarPorId(Long id) {
         return itemRepository.findById(id);
     }
 
-    public Optional<Item> atualizar(Long id, Item itemAtualizado) {
-        return itemRepository.findById(id)
-                .map(item -> {
-                    item.setNome(itemAtualizado.getNome());
-                    item.setQuantidade(itemAtualizado.getQuantidade());
-                    item.setDataValidade(itemAtualizado.getDataValidade());
-                    item.setCategoria(itemAtualizado.getCategoria());
-                    return itemRepository.save(item);
-                });
-    }
-
-    public boolean deletar(Long id) {
-        if (!itemRepository.existsById(id)) {
-            return false;
+    @Transactional
+        public Optional<Item> atualizar(Long id, Item itemAtualizado) {
+            return itemRepository.findById(id)
+                    .map(item -> {
+                        item.setNome(itemAtualizado.getNome());
+                        item.setQuantidade(itemAtualizado.getQuantidade());
+                        item.setDataValidade(itemAtualizado.getDataValidade());
+                        item.setCategoria(itemAtualizado.getCategoria());
+                        return itemRepository.save(item);
+                    });
         }
 
-        itemRepository.deleteById(id);
-        return true;
-    }
+    @Transactional
+        public boolean deletar(Long id) {
+            if (!itemRepository.existsById(id)) {
+                return false;
+            }
+
+            itemRepository.deleteById(id);
+            return true;
+        }
 }
